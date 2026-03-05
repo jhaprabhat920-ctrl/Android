@@ -98,4 +98,8 @@
     <string name="syncRestoreDialogPrimaryCta">Restore My Stuff</string>
     <string name="syncRestoreDialogSecondaryCta">Skip</string>
 
+    <!--Onboarding Rebrand Design Update-->
+    <string name="preOnboardingWelcomeDialogTitle">Hi there!</string>
+    <string name="preOnboardingWelcomeDialogBody">Ready for a faster browser that keeps you protected?</string>
+
 </resources>
