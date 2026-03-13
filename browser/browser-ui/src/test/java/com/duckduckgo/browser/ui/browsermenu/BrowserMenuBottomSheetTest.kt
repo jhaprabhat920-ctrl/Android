@@ -186,6 +186,24 @@ class BrowserMenuBottomSheetTest {
         assertFalse(dialog.createAliasMenuItem.isVisible)
     }
 
+    @Test
+    fun whenRenderBrowserMenuWithShowDownloadDotTrueThenDownloadDotIndicatorIsVisible() {
+        val viewState = BrowserMenuViewState.Browser(showDownloadDot = true)
+
+        dialog.render(viewState)
+
+        assertTrue(dialog.downloadsMenuItem.showDotIndicator)
+    }
+
+    @Test
+    fun whenRenderBrowserMenuWithShowDownloadDotFalseThenDownloadDotIndicatorIsHidden() {
+        val viewState = BrowserMenuViewState.Browser(showDownloadDot = false)
+
+        dialog.render(viewState)
+
+        assertFalse(dialog.downloadsMenuItem.showDotIndicator)
+    }
+
     // region Helpers
 
     private val menuHeader: View

@@ -263,6 +263,7 @@ class BrowserMenuBottomSheet(
         renderPageContextHeader(viewState.pageContextHeader)
         renderVpnMenu(viewState.vpnMenuState)
         fireMenuItem.isVisible = viewState.showFireMenuItem
+        downloadsMenuItem.showDotIndicator = viewState.showDownloadDot
 
         binding.urlPageActionsSectionDivider.isVisible = true
         binding.librarySectionDivider.isVisible = true

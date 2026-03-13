@@ -31,6 +31,7 @@ sealed class BrowserMenuViewState {
         val canFireproofSite: Boolean = false,
         val isFireproofWebsite: Boolean = false,
         val showFireMenuItem: Boolean = false,
+        val showDownloadDot: Boolean = false,
         val isEmailSignedIn: Boolean = false,
         val canChangeBrowsingMode: Boolean = false,
         val isDesktopBrowsingMode: Boolean = false,
