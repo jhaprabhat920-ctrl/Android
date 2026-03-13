@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.duckduckgo.mobile.android.R
+import com.duckduckgo.fonts.R as FontsR
 
 /**
  * Default typography for DuckDuckGo theme.
@@ -34,6 +35,18 @@ import com.duckduckgo.mobile.android.R
 
 private val RobotoMono = FontFamily(
     Font(R.font.roboto_mono, FontWeight.Normal),
+)
+
+private val DuckSansDisplay = FontFamily(
+    Font(FontsR.font.ducksans_display, FontWeight.Normal),
+    Font(FontsR.font.ducksans_display, FontWeight.Medium),
+    Font(FontsR.font.ducksans_display, FontWeight.Bold),
+)
+
+private val DuckSansProduct = FontFamily(
+    Font(FontsR.font.ducksans_product, FontWeight.Normal),
+    Font(FontsR.font.ducksans_product, FontWeight.Medium),
+    Font(FontsR.font.ducksans_product, FontWeight.Bold),
 )
 
 @Immutable
@@ -142,6 +155,22 @@ data class DuckDuckGoTypography(
             fontSize = 12.sp,
             lineHeight = 16.sp,
             letterSpacing = 0.2.sp,
+        ),
+    ),
+
+    val onboardingTitle: DuckDuckGoTextStyle = DuckDuckGoTextStyle(
+        TextStyle(
+            fontSize = 24.sp,
+            fontFamily = DuckSansDisplay,
+            fontWeight = FontWeight.Bold,
+        ),
+    ),
+
+    val onboardingBody: DuckDuckGoTextStyle = DuckDuckGoTextStyle(
+        TextStyle(
+            fontSize = 18.sp,
+            fontFamily = DuckSansProduct,
+            fontWeight = FontWeight.Normal,
         ),
     ),
 )
