@@ -19,6 +19,7 @@ package com.duckduckgo.app.browser.menu
 import com.duckduckgo.app.browser.SSLErrorType.NONE
 import com.duckduckgo.app.browser.omnibar.Omnibar
 import com.duckduckgo.app.browser.viewstate.BrowserViewState
+import com.duckduckgo.app.browser.viewstate.HighlightableButton
 import com.duckduckgo.browser.ui.browsermenu.BrowserMenuViewState
 import com.duckduckgo.di.scopes.AppScope
 import com.duckduckgo.duckchat.api.DuckAiFeatureState
@@ -79,6 +80,7 @@ class RealBrowserMenuViewStateFactory @Inject constructor(
         return BrowserMenuViewState.NewTabPage(
             showDuckChatOption = browserViewState.showDuckChatOption,
             vpnMenuState = browserViewState.vpnMenuState,
+            isEmailSignedIn = browserViewState.isEmailSignedIn,
             showAutofill = browserViewState.showAutofill,
             canGoForward = browserViewState.canGoForward,
         )
@@ -108,8 +110,10 @@ class RealBrowserMenuViewStateFactory @Inject constructor(
             showSelectDefaultBrowserMenuItem = browserViewState.showSelectDefaultBrowserMenuItem,
             canSaveSite = browserViewState.canSaveSite,
             isBookmark = browserViewState.bookmark != null,
+            vpnMenuState = browserViewState.vpnMenuState,
             canFireproofSite = browserViewState.canFireproofSite,
             isFireproofWebsite = browserViewState.isFireproofWebsite,
+            showFireMenuItem = browserViewState.fireButton is HighlightableButton.Visible,
             isEmailSignedIn = browserViewState.isEmailSignedIn,
             canChangeBrowsingMode = browserViewState.canChangeBrowsingMode,
             isDesktopBrowsingMode = browserViewState.isDesktopBrowsingMode,
