@@ -1774,6 +1774,9 @@ class BrowserTabFragment :
             onMenuItemClicked(duckChatSettingsMenuItem) {
                 viewModel.openDuckChatSettings()
             }
+            onMenuItemClicked(fireMenuItem) {
+                onFireButtonPressed()
+            }
         }
     }
 
