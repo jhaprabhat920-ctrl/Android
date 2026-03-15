@@ -27,7 +27,6 @@ import com.duckduckgo.app.settings.db.SettingsDataStore
 import com.duckduckgo.app.tabs.model.TabEntity
 import com.duckduckgo.app.tabs.model.TabRepository
 import com.duckduckgo.common.test.CoroutineTestRule
-import com.duckduckgo.dataclearing.api.plugin.DataClearingParams
 import com.duckduckgo.dataclearing.api.plugin.DataClearingTrigger
 import com.duckduckgo.dataclearing.api.plugin.DataType
 import com.duckduckgo.duckchat.api.DuckAiFeatureState
@@ -755,9 +754,9 @@ class DataClearingTest {
 
         testee.clearSingleTabData("tab1")
 
-        val captor = argumentCaptor<DataClearingParams>()
+        val captor = argumentCaptor<Set<DataType>>()
         verify(mockDataClearingTrigger).clearData(captor.capture())
-        val types = captor.firstValue.types
+        val types = captor.firstValue
         assertTrue(types.any { it is DataType.Tabs.Single && it.tabId == "tab1" })
     }
 
@@ -769,9 +768,9 @@ class DataClearingTest {
 
         testee.clearSingleTabData("tab1")
 
-        val captor = argumentCaptor<DataClearingParams>()
+        val captor = argumentCaptor<Set<DataType>>()
         verify(mockDataClearingTrigger).clearData(captor.capture())
-        val types = captor.firstValue.types
+        val types = captor.firstValue
         assertTrue(types.any { it is DataType.DuckChats.Contextual && it.tabId == "tab1" })
         assertFalse(types.any { it is DataType.DuckChats.Single })
     }
@@ -784,9 +783,9 @@ class DataClearingTest {
 
         testee.clearSingleTabData("tab1")
 
-        val captor = argumentCaptor<DataClearingParams>()
+        val captor = argumentCaptor<Set<DataType>>()
         verify(mockDataClearingTrigger).clearData(captor.capture())
-        val types = captor.firstValue.types
+        val types = captor.firstValue
         assertTrue(types.any { it is DataType.DuckChats.Single && it.chatUrl == "https://duck.ai/chat?chatID=abc-123" })
         assertTrue(types.any { it is DataType.DuckChats.Contextual && it.tabId == "tab1" })
     }
@@ -799,9 +798,9 @@ class DataClearingTest {
 
         testee.clearSingleTabData("tab1")
 
-        val captor = argumentCaptor<DataClearingParams>()
+        val captor = argumentCaptor<Set<DataType>>()
         verify(mockDataClearingTrigger).clearData(captor.capture())
-        val types = captor.firstValue.types
+        val types = captor.firstValue
         assertFalse(types.any { it is DataType.DuckChats })
     }
 

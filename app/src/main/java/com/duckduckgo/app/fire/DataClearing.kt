@@ -25,7 +25,6 @@ import com.duckduckgo.app.settings.clear.ClearWhenOption
 import com.duckduckgo.app.settings.clear.FireClearOption
 import com.duckduckgo.app.settings.db.SettingsDataStore
 import com.duckduckgo.app.tabs.model.TabRepository
-import com.duckduckgo.dataclearing.api.plugin.DataClearingParams
 import com.duckduckgo.dataclearing.api.plugin.DataClearingTrigger
 import com.duckduckgo.dataclearing.api.plugin.DataType
 import com.duckduckgo.di.scopes.AppScope
@@ -84,7 +83,7 @@ class DataClearing @Inject constructor(
         }
 
         tabRepository.deleteTabAndSelectSource(tabId)
-        dataClearingTrigger.clearData(DataClearingParams(types))
+        dataClearingTrigger.clearData(types)
 
         logcat { "Single tab clear completed for tab: $tabId" }
         return clearDataResult
