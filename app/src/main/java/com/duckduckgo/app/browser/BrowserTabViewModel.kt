@@ -2419,14 +2419,18 @@ class BrowserTabViewModel @Inject constructor(
                         privacyShield = privacyProtection,
                         trackersBlocked = site?.trackerCount ?: 0,
                     )
+                val isErrorMode = browserViewState.value?.browserError != null && browserViewState.value?.browserError != OMITTED
                 browserViewState.value = currentBrowserViewState().copy(
                     pageContextHeader = site?.let {
-                        if (duckChat.isDuckChatUrl(it.url.toUri())) {
+                        val shortUrl = addressDisplayFormatter.getShortUrl(it.url)
+                        if (isErrorMode) {
+                            PageContextHeaderState.Error(shortUrl)
+                        } else if (duckChat.isDuckChatUrl(it.url.toUri())) {
                             PageContextHeaderState.DuckAi(tabId = tabId)
                         } else {
                             PageContextHeaderState.Visible(
                                 title = it.title,
-                                shortUrl = addressDisplayFormatter.getShortUrl(it.url),
+                                shortUrl = shortUrl,
                                 tabId = tabId,
                             )
                         }
