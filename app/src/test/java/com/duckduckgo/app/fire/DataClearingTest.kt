@@ -27,8 +27,8 @@ import com.duckduckgo.app.settings.db.SettingsDataStore
 import com.duckduckgo.app.tabs.model.TabEntity
 import com.duckduckgo.app.tabs.model.TabRepository
 import com.duckduckgo.common.test.CoroutineTestRule
+import com.duckduckgo.dataclearing.api.plugin.ClearableData
 import com.duckduckgo.dataclearing.api.plugin.DataClearingTrigger
-import com.duckduckgo.dataclearing.api.plugin.DataType
 import com.duckduckgo.duckchat.api.DuckAiFeatureState
 import com.duckduckgo.history.api.NavigationHistory
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -754,10 +754,10 @@ class DataClearingTest {
 
         testee.clearSingleTabData("tab1")
 
-        val captor = argumentCaptor<Set<DataType>>()
+        val captor = argumentCaptor<Set<ClearableData>>()
         verify(mockDataClearingTrigger).clearData(captor.capture())
         val types = captor.firstValue
-        assertTrue(types.any { it is DataType.Tabs.Single && it.tabId == "tab1" })
+        assertTrue(types.any { it is ClearableData.Tabs.Single && it.tabId == "tab1" })
     }
 
     @Test
@@ -768,11 +768,11 @@ class DataClearingTest {
 
         testee.clearSingleTabData("tab1")
 
-        val captor = argumentCaptor<Set<DataType>>()
+        val captor = argumentCaptor<Set<ClearableData>>()
         verify(mockDataClearingTrigger).clearData(captor.capture())
         val types = captor.firstValue
-        assertTrue(types.any { it is DataType.DuckChats.Contextual && it.tabId == "tab1" })
-        assertFalse(types.any { it is DataType.DuckChats.Single })
+        assertTrue(types.any { it is ClearableData.DuckChats.Contextual && it.tabId == "tab1" })
+        assertFalse(types.any { it is ClearableData.DuckChats.Single })
     }
 
     @Test
@@ -783,11 +783,11 @@ class DataClearingTest {
 
         testee.clearSingleTabData("tab1")
 
-        val captor = argumentCaptor<Set<DataType>>()
+        val captor = argumentCaptor<Set<ClearableData>>()
         verify(mockDataClearingTrigger).clearData(captor.capture())
         val types = captor.firstValue
-        assertTrue(types.any { it is DataType.DuckChats.Single && it.chatUrl == "https://duck.ai/chat?chatID=abc-123" })
-        assertTrue(types.any { it is DataType.DuckChats.Contextual && it.tabId == "tab1" })
+        assertTrue(types.any { it is ClearableData.DuckChats.Single && it.chatUrl == "https://duck.ai/chat?chatID=abc-123" })
+        assertTrue(types.any { it is ClearableData.DuckChats.Contextual && it.tabId == "tab1" })
     }
 
     @Test
@@ -798,10 +798,10 @@ class DataClearingTest {
 
         testee.clearSingleTabData("tab1")
 
-        val captor = argumentCaptor<Set<DataType>>()
+        val captor = argumentCaptor<Set<ClearableData>>()
         verify(mockDataClearingTrigger).clearData(captor.capture())
         val types = captor.firstValue
-        assertFalse(types.any { it is DataType.DuckChats })
+        assertFalse(types.any { it is ClearableData.DuckChats })
     }
 
     private suspend fun configureManualOptions(options: Set<FireClearOption>) {

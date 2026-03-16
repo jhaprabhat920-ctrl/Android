@@ -25,8 +25,8 @@ import com.duckduckgo.app.settings.clear.ClearWhenOption
 import com.duckduckgo.app.settings.clear.FireClearOption
 import com.duckduckgo.app.settings.db.SettingsDataStore
 import com.duckduckgo.app.tabs.model.TabRepository
+import com.duckduckgo.dataclearing.api.plugin.ClearableData
 import com.duckduckgo.dataclearing.api.plugin.DataClearingTrigger
-import com.duckduckgo.dataclearing.api.plugin.DataType
 import com.duckduckgo.di.scopes.AppScope
 import com.duckduckgo.duckchat.api.DuckAiFeatureState
 import com.duckduckgo.history.api.NavigationHistory
@@ -70,15 +70,15 @@ class DataClearing @Inject constructor(
 
         navigationHistory.removeHistoryForTab(tabId)
 
-        val types = buildSet<DataType> {
+        val types = buildSet<ClearableData> {
             val tabUrl = tabRepository.getTab(tabId)?.url
-            add(DataType.Tabs.Single(tabId))
+            add(ClearableData.Tabs.Single(tabId))
 
             val isDuckAiChatHistoryClearingEnabled = fireDataStore.getManualClearOptions()
                 .contains(FireClearOption.DUCKAI_CHATS)
             if (isDuckAiChatHistoryClearingEnabled) {
-                tabUrl?.let { add(DataType.DuckChats.Single(it)) }
-                add(DataType.DuckChats.Contextual(tabId))
+                tabUrl?.let { add(ClearableData.DuckChats.Single(it)) }
+                add(ClearableData.DuckChats.Contextual(tabId))
             }
         }
 
