@@ -38,11 +38,26 @@ plugins {
     id 'com.diffplug.spotless' apply false
 }
 
+def gprUser = findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
+def gprKey = findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+def hasGprCredentials = gprUser != null && gprKey != null
+def useProprietaryFontProp = findProperty("useProprietaryFont")
+ext.proprietaryFontAvailable = hasGprCredentials && useProprietaryFontProp?.toBoolean() != false
+
 allprojects {
     repositories {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
+        if (rootProject.ext.proprietaryFontAvailable) {
+            maven {
+                url = uri("https://maven.pkg.github.com/duckduckgo/native-apps-ducksans")
+                credentials {
+                    username = gprUser
+                    password = gprKey
+                }
+            }
+        }
     }
     configurations.all {
         resolutionStrategy.force 'org.objenesis:objenesis:2.6'
