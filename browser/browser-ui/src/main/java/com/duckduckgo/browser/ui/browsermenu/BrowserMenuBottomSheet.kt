@@ -268,7 +268,7 @@ class BrowserMenuBottomSheet(
     }
 
     private fun renderNewTabPageMenu(viewState: BrowserMenuViewState.NewTabPage) {
-        binding.menuHeader.root.isVisible = false
+        renderPageContextHeader(viewState.pageContextHeader)
 
         backMenuItem.isEnabled = false
         forwardMenuItem.isEnabled = viewState.canGoForward

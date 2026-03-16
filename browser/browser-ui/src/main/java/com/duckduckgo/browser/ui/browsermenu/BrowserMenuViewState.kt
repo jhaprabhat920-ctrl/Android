@@ -63,6 +63,7 @@ sealed class BrowserMenuViewState {
         val showDuckChatOption: Boolean = false,
         val vpnMenuState: VpnMenuState = VpnMenuState.Hidden,
         val showAutofill: Boolean = false,
+        val pageContextHeader: PageContextHeaderState = PageContextHeaderState.Hidden,
     ) : BrowserMenuViewState()
 
     data class DuckAi(

@@ -21,6 +21,7 @@ import com.duckduckgo.app.browser.SSLErrorType.NONE
 import com.duckduckgo.app.browser.omnibar.Omnibar.ViewMode
 import com.duckduckgo.app.browser.viewstate.BrowserViewState
 import com.duckduckgo.browser.ui.browsermenu.BrowserMenuViewState
+import com.duckduckgo.browser.ui.browsermenu.PageContextHeaderState
 import com.duckduckgo.browser.ui.browsermenu.VpnMenuState
 import com.duckduckgo.common.test.CoroutineTestRule
 import com.duckduckgo.duckchat.api.DuckAiFeatureState
@@ -104,6 +105,7 @@ class RealBrowserMenuViewStateFactoryTest {
             showDuckChatOption = true,
             vpnMenuState = VpnMenuState.Hidden,
             showAutofill = true,
+            pageContextHeader = PageContextHeaderState.Error(shortUrl = "example.com"),
         )
 
         val omnibarViewMode = ViewMode.Error
@@ -114,6 +116,7 @@ class RealBrowserMenuViewStateFactoryTest {
         assertTrue(viewState.showDuckChatOption)
         assertTrue(viewState.showAutofill)
         assertTrue(viewState.vpnMenuState == VpnMenuState.Hidden)
+        assertEquals(PageContextHeaderState.Error(shortUrl = "example.com"), viewState.pageContextHeader)
     }
 
     @Test
