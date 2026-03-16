@@ -16,6 +16,7 @@ jobs:
     name: Run Design System Maestro Tests
     env:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+      GH_TOKEN: ${{ secrets.GT_DAXMOBILE }}
 
     steps:
       - name: Checkout repository

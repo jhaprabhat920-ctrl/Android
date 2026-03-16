@@ -13,6 +13,8 @@ jobs:
   run-release-tests:
     name: Create release APK and run E2E Maestro tests
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GT_DAXMOBILE }}
     steps:
       - name: Checkout develop
         uses: actions/checkout@v4

@@ -61,6 +61,7 @@ jobs:
       - name: Assemble the project
         env:
           MALICIOUS_SITE_PROTECTION_AUTH_TOKEN: ${{ secrets.MALICIOUS_SITE_PROTECTION_AUTH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GT_DAXMOBILE }}
         run: ./gradlew assembleInternalDebug -Pforce-default-variant
 
       - name: Obtain debug apk

@@ -13,6 +13,8 @@ jobs:
   instrumentation_tests:
     runs-on: ubuntu-latest
     name: Autofill Critical Path End-to-End Tests
+    env:
+      GH_TOKEN: ${{ secrets.GT_DAXMOBILE }}
 
     steps:
 

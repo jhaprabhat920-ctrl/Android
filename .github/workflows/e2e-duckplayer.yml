@@ -20,6 +20,8 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' }}
     name: Duck Player Tests
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GT_DAXMOBILE }}
 
     steps:
       - name: Checkout repository

@@ -13,6 +13,8 @@ jobs:
   instrumentation_tests:
     runs-on: ubuntu-latest
     name: End-to-End tests
+    env:
+      GH_TOKEN: ${{ secrets.GT_DAXMOBILE }}
 
     steps:
       - name: Checkout repository
