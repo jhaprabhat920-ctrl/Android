@@ -21,6 +21,7 @@ import com.duckduckgo.app.browser.SSLErrorType.NONE
 import com.duckduckgo.app.browser.omnibar.Omnibar.ViewMode
 import com.duckduckgo.app.browser.viewstate.BrowserViewState
 import com.duckduckgo.browser.ui.browsermenu.BrowserMenuViewState
+import com.duckduckgo.browser.ui.browsermenu.PageContextHeaderState
 import com.duckduckgo.browser.ui.browsermenu.VpnMenuState
 import com.duckduckgo.common.test.CoroutineTestRule
 import com.duckduckgo.duckchat.api.DuckAiFeatureState
@@ -101,19 +102,23 @@ class RealBrowserMenuViewStateFactoryTest {
     @Test
     fun `when creating menu in error mode we return the proper state`() = runTest {
         val browserViewState = BrowserViewState(
-            showDuckChatOption = true,
-            vpnMenuState = VpnMenuState.Hidden,
+            canGoBack = true,
+            canGoForward = true,
+            canSharePage = true,
             showAutofill = true,
+            pageContextHeader = PageContextHeaderState.Error(shortUrl = "example.com"),
         )
 
         val omnibarViewMode = ViewMode.Error
 
         val result = testee.create(omnibarViewMode = omnibarViewMode, viewState = browserViewState, customTabsMode = false)
-        val viewState = result as BrowserMenuViewState.NewTabPage
+        val viewState = result as BrowserMenuViewState.Browser
 
-        assertTrue(viewState.showDuckChatOption)
+        assertTrue(viewState.canGoBack)
+        assertTrue(viewState.canGoForward)
+        assertTrue(viewState.canSharePage)
         assertTrue(viewState.showAutofill)
-        assertTrue(viewState.vpnMenuState == VpnMenuState.Hidden)
+        assertTrue(viewState.pageContextHeader is PageContextHeaderState.Error)
     }
 
     @Test

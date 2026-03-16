@@ -50,7 +50,7 @@ class RealBrowserMenuViewStateFactory @Inject constructor(
             when (omnibarViewMode) {
                 Omnibar.ViewMode.NewTab -> createNewTabPageViewState(viewState)
                 Omnibar.ViewMode.DuckAI -> createDuckAiViewState(viewState)
-                Omnibar.ViewMode.Error -> createNewTabPageViewState(viewState)
+                Omnibar.ViewMode.Error -> createBrowserViewState(browserViewState = viewState)
                 Omnibar.ViewMode.SSLWarning -> createNewTabPageViewState(viewState)
                 Omnibar.ViewMode.MaliciousSiteWarning -> createNewTabPageViewState(viewState)
                 else -> createBrowserViewState(browserViewState = viewState)
