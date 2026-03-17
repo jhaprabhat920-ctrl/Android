@@ -38,8 +38,8 @@ plugins {
     id 'com.diffplug.spotless' apply false
 }
 
-def gprUser = findProperty("gpr.user") ?: "daxmobile"
-def gprKey = findProperty("gpr.key") ?: System.getenv("GH_TOKEN")
+def gprUser = findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
+def gprKey = findProperty("gpr.key") ?: System.getenv("DAXMOBILE_ANDROID_AUTOMATION")
 def hasGprCredentials = gprUser != null && gprKey != null
 def useProprietaryFontProp = findProperty("useProprietaryFont")
 ext.proprietaryFontAvailable = hasGprCredentials && useProprietaryFontProp?.toBoolean() != false
