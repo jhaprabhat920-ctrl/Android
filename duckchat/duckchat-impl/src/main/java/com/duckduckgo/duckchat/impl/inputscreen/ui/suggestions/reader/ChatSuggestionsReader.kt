@@ -45,7 +45,6 @@ import javax.inject.Inject
 
 interface ChatSuggestionsReader {
     suspend fun fetchSuggestions(query: String = ""): List<ChatSuggestion>
-    suspend fun fetchAllChats(): List<ChatSuggestion>
     fun tearDown()
 }
 
@@ -85,23 +84,6 @@ class RealChatSuggestionsReader @Inject constructor(
                 (result.pinnedChats + result.recentChats).maxOfOrNull { it.lastEdit } ?: LocalDateTime.MIN
             } ?: return@withContext emptyList()
             mergeSuggestions(bestResult.pinnedChats, bestResult.recentChats, maxSuggestions)
-        }
-    }
-
-    override suspend fun fetchAllChats(): List<ChatSuggestion> {
-        return withContext(dispatchers.main()) {
-            val script = getScript()
-            val webView = getOrCreateWebView(script)
-            val params = JSONObject().apply {
-                put("max_chats", 1000) // no 'since' filter, no 'query' filter
-            }
-            val results = DOMAINS.mapNotNull { domain ->
-                fetchFromDomain(webView, domain, params)
-            }
-            val bestResult = results.maxByOrNull { r ->
-                (r.pinnedChats + r.recentChats).maxOfOrNull { it.lastEdit } ?: LocalDateTime.MIN
-            } ?: return@withContext emptyList()
-            mergeSuggestions(bestResult.pinnedChats, bestResult.recentChats, Int.MAX_VALUE) // no cap — return all chats
         }
     }
 
