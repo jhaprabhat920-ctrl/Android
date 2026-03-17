@@ -21,6 +21,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.duckduckgo.anvil.annotations.ContributesViewModel
+import com.duckduckgo.app.di.AppCoroutineScope
 import com.duckduckgo.common.utils.ConflatedJob
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.di.scopes.ActivityScope
@@ -37,6 +38,7 @@ import com.duckduckgo.sync.impl.Result.Success
 import com.duckduckgo.sync.impl.SyncAccountRepository
 import com.duckduckgo.sync.impl.SyncFeatureToggle
 import com.duckduckgo.sync.impl.auth.DeviceAuthenticator
+import com.duckduckgo.sync.impl.autorestore.SyncAutoRestoreManager
 import com.duckduckgo.sync.impl.onFailure
 import com.duckduckgo.sync.impl.onSuccess
 import com.duckduckgo.sync.impl.pixels.SyncAccountOperation
@@ -58,6 +60,7 @@ import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.ShowError
 import com.duckduckgo.sync.impl.ui.SyncDeviceListItem.LoadingItem
 import com.duckduckgo.sync.impl.ui.SyncDeviceListItem.SyncedDevice
 import com.duckduckgo.sync.impl.ui.qrcode.SyncBarcodeUrl
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -86,10 +89,15 @@ class SyncActivityViewModel @Inject constructor(
     private val syncFeatureToggle: SyncFeatureToggle,
     private val settingsPageFeature: SettingsPageFeature,
     private val syncPixels: SyncPixels,
+    private val syncAutoRestoreManager: SyncAutoRestoreManager,
+    @AppCoroutineScope private val appCoroutineScope: CoroutineScope,
 ) : ViewModel() {
 
     private var syncStateObserverJob = ConflatedJob()
     private var backgroundRefreshJob = ConflatedJob()
+
+    private var autoRestoreAvailable = false
+    private var initialAutoRestoreEnabled = false
 
     private val command = Channel<Command>(1, DROP_OLDEST)
     private val viewState = MutableStateFlow(ViewState())
@@ -153,6 +161,8 @@ class SyncActivityViewModel @Inject constructor(
             disabledSetupFlows = disabledSetupFlows(),
             aiChatSyncEnabled = syncFeatureToggle.allowAiChatSync(),
             newDesktopBrowserSettingEnabled = settingsPageFeature.newDesktopBrowserSettingEnabled().isEnabled(),
+            showAutoRestoreToggle = viewState.value.showAutoRestoreToggle,
+            autoRestoreEnabled = viewState.value.autoRestoreEnabled,
         )
     }
 
@@ -161,11 +171,23 @@ class SyncActivityViewModel @Inject constructor(
             if (!syncAccountRepository.isSignedIn()) {
                 signedOutState()
             } else {
+                loadAutoRestoreState()
                 signedInState()
             }
         }
 
         viewState.value = state
+    }
+
+    private suspend fun loadAutoRestoreState() {
+        autoRestoreAvailable = syncAutoRestoreManager.isAutoRestoreAvailable()
+        if (!autoRestoreAvailable) return
+        val enabled = syncAutoRestoreManager.isRestoreOnReinstallEnabled()
+        initialAutoRestoreEnabled = enabled
+        viewState.value = viewState.value.copy(
+            showAutoRestoreToggle = true,
+            autoRestoreEnabled = enabled,
+        )
     }
 
     data class ViewState(
@@ -174,6 +196,8 @@ class SyncActivityViewModel @Inject constructor(
         val disabledSetupFlows: List<SetupFlows> = emptyList(),
         val aiChatSyncEnabled: Boolean = false,
         val newDesktopBrowserSettingEnabled: Boolean = false,
+        val showAutoRestoreToggle: Boolean = false,
+        val autoRestoreEnabled: Boolean = false,
     )
 
     sealed class SetupFlows {
@@ -324,6 +348,37 @@ class SyncActivityViewModel @Inject constructor(
         viewModelScope.launch {
             requiresSetupAuthentication {
                 command.send(CheckIfUserHasStoragePermission)
+            }
+        }
+    }
+
+    fun onAutoRestoreToggleChanged(enabled: Boolean) {
+        logcat { "Sync-Recovery: restore on reinstall toggle changed to $enabled (pending until screen exit)" }
+        viewState.value = viewState.value.copy(autoRestoreEnabled = enabled)
+    }
+
+    fun onScreenExit() {
+        val current = viewState.value
+        if (!autoRestoreAvailable) {
+            logcat { "Sync-Recovery: screen exit — auto-restore not available, nothing to write" }
+            return
+        }
+        if (current.autoRestoreEnabled == initialAutoRestoreEnabled) {
+            logcat { "Sync-Recovery: screen exit — restore on reinstall unchanged (${current.autoRestoreEnabled}), nothing to write" }
+            return
+        }
+        logcat { "Sync-Recovery: screen exit — committing restore on reinstall: $initialAutoRestoreEnabled -> ${current.autoRestoreEnabled}" }
+        appCoroutineScope.launch(dispatchers.io()) {
+            syncAutoRestoreManager.setRestoreOnReinstallEnabled(current.autoRestoreEnabled)
+            if (current.autoRestoreEnabled) {
+                syncAccountRepository.getRecoveryCode().onSuccess { authCode ->
+                    val deviceId = syncAccountRepository.getThisConnectedDevice()?.deviceId
+                    logcat { "Sync-Recovery: saving recovery payload to Block Store (deviceId=$deviceId)" }
+                    syncAutoRestoreManager.saveRecoveryPayload(authCode.rawCode, deviceId)
+                }
+            } else {
+                logcat { "Sync-Recovery: clearing recovery payload from Block Store" }
+                syncAutoRestoreManager.clearRecoveryCode()
             }
         }
     }

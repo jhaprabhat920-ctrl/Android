@@ -41,6 +41,7 @@ import com.duckduckgo.sync.impl.SyncAccountRepository
 import com.duckduckgo.sync.impl.SyncAccountRepository.AuthCode
 import com.duckduckgo.sync.impl.SyncFeatureToggle
 import com.duckduckgo.sync.impl.auth.DeviceAuthenticator
+import com.duckduckgo.sync.impl.autorestore.SyncAutoRestoreManager
 import com.duckduckgo.sync.impl.pixels.SyncPixels
 import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command
 import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.AskTurnOffSync
@@ -56,6 +57,7 @@ import com.duckduckgo.sync.impl.ui.SyncDeviceListItem.SyncedDevice
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -66,8 +68,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.lang.String.format
@@ -87,6 +91,7 @@ class SyncActivityViewModelTest {
     private val syncFeatureToggle: SyncFeatureToggle = mock()
     private val syncPixels: SyncPixels = mock()
     private val deviceAuthenticator: DeviceAuthenticator = mock()
+    private val syncAutoRestoreManager: SyncAutoRestoreManager = mock()
 
     private val fakeSettingsPageFeature = FakeFeatureToggleFactory.create(SettingsPageFeature::class.java)
 
@@ -106,10 +111,16 @@ class SyncActivityViewModelTest {
             settingsPageFeature = fakeSettingsPageFeature,
             syncPixels = syncPixels,
             deviceAuthenticator = deviceAuthenticator,
+            syncAutoRestoreManager = syncAutoRestoreManager,
+            appCoroutineScope = coroutineTestRule.testScope,
         )
         whenever(deviceAuthenticator.isAuthenticationRequired()).thenReturn(true)
         whenever(syncStateMonitor.syncState()).thenReturn(emptyFlow())
         whenever(syncAccountRepository.isSyncSupported()).thenReturn(true)
+        runBlocking {
+            whenever(syncAutoRestoreManager.isAutoRestoreAvailable()).thenReturn(false)
+            whenever(syncAutoRestoreManager.isRestoreOnReinstallEnabled()).thenReturn(true)
+        }
     }
 
     @Test
@@ -695,6 +706,167 @@ class SyncActivityViewModelTest {
             assertFalse(viewState.newDesktopBrowserSettingEnabled)
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun whenUserSignedOutThenAutoRestoreToggleIsHidden() = runTest {
+        testee.viewState().test {
+            val viewState = expectMostRecentItem()
+            assertFalse(viewState.showAutoRestoreToggle)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenAutoRestoreAvailableThenViewStateShowsToggle() = runTest {
+        whenever(syncAutoRestoreManager.isAutoRestoreAvailable()).thenReturn(true)
+        whenever(syncAutoRestoreManager.isRestoreOnReinstallEnabled()).thenReturn(true)
+        givenAuthenticatedUser()
+
+        testee.viewState().test {
+            val viewState = expectMostRecentItem()
+            assertTrue(viewState.showAutoRestoreToggle)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenAutoRestoreNotAvailableThenViewStateHidesToggle() = runTest {
+        whenever(syncAutoRestoreManager.isAutoRestoreAvailable()).thenReturn(false)
+        givenAuthenticatedUser()
+
+        testee.viewState().test {
+            val viewState = expectMostRecentItem()
+            assertFalse(viewState.showAutoRestoreToggle)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenAutoRestoreEnabledThenViewStateReflectsEnabled() = runTest {
+        whenever(syncAutoRestoreManager.isAutoRestoreAvailable()).thenReturn(true)
+        whenever(syncAutoRestoreManager.isRestoreOnReinstallEnabled()).thenReturn(true)
+        givenAuthenticatedUser()
+
+        testee.viewState().test {
+            val viewState = expectMostRecentItem()
+            assertTrue(viewState.autoRestoreEnabled)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenAutoRestoreDisabledThenViewStateReflectsDisabled() = runTest {
+        whenever(syncAutoRestoreManager.isAutoRestoreAvailable()).thenReturn(true)
+        whenever(syncAutoRestoreManager.isRestoreOnReinstallEnabled()).thenReturn(false)
+        givenAuthenticatedUser()
+
+        testee.viewState().test {
+            val viewState = expectMostRecentItem()
+            assertFalse(viewState.autoRestoreEnabled)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenAutoRestoreToggleChangedThenUpdatesViewStateOnly() = runTest {
+        whenever(syncAutoRestoreManager.isAutoRestoreAvailable()).thenReturn(true)
+        whenever(syncAutoRestoreManager.isRestoreOnReinstallEnabled()).thenReturn(true)
+        givenAuthenticatedUser()
+
+        testee.viewState().test {
+            expectMostRecentItem()
+            testee.onAutoRestoreToggleChanged(false)
+            val updatedState = awaitItem()
+            assertFalse(updatedState.autoRestoreEnabled)
+            verify(syncAutoRestoreManager, never()).setRestoreOnReinstallEnabled(any())
+            verify(syncAutoRestoreManager, never()).saveRecoveryPayload(any(), anyOrNull())
+            verify(syncAutoRestoreManager, never()).clearRecoveryCode()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenScreenExitsWithAutoRestoreEnabledThenSavesPayloadAndSetsPreference() = runTest {
+        val authCode = AuthCode(qrCode = jsonRecoveryKeyEncoded, rawCode = "rawCode")
+        whenever(syncAutoRestoreManager.isAutoRestoreAvailable()).thenReturn(true)
+        whenever(syncAutoRestoreManager.isRestoreOnReinstallEnabled()).thenReturn(false)
+        givenAuthenticatedUser()
+        whenever(syncAccountRepository.getRecoveryCode()).thenReturn(Result.Success(authCode))
+
+        testee.viewState().test {
+            expectMostRecentItem()
+            testee.onAutoRestoreToggleChanged(true)
+            awaitItem()
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        testee.onScreenExit()
+
+        verify(syncAutoRestoreManager).setRestoreOnReinstallEnabled(true)
+        verify(syncAutoRestoreManager).saveRecoveryPayload(eq("rawCode"), anyOrNull())
+    }
+
+    @Test
+    fun whenScreenExitsWithAutoRestoreDisabledThenClearsPayloadAndSetsPreference() = runTest {
+        whenever(syncAutoRestoreManager.isAutoRestoreAvailable()).thenReturn(true)
+        whenever(syncAutoRestoreManager.isRestoreOnReinstallEnabled()).thenReturn(true)
+        givenAuthenticatedUser()
+
+        testee.viewState().test {
+            expectMostRecentItem()
+            testee.onAutoRestoreToggleChanged(false)
+            awaitItem()
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        testee.onScreenExit()
+
+        verify(syncAutoRestoreManager).setRestoreOnReinstallEnabled(false)
+        verify(syncAutoRestoreManager).clearRecoveryCode()
+    }
+
+    @Test
+    fun whenScreenExitsAndFeatureWasUnavailableThenNoStorageOperations() = runTest {
+        // Feature unavailable at load time — autoRestoreAvailable captured as false
+        whenever(syncAutoRestoreManager.isAutoRestoreAvailable()).thenReturn(false)
+        whenever(syncAutoRestoreManager.isRestoreOnReinstallEnabled()).thenReturn(false)
+        givenAuthenticatedUser()
+
+        testee.viewState().test {
+            expectMostRecentItem()
+            testee.onAutoRestoreToggleChanged(true)
+            awaitItem()
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        testee.onScreenExit()
+
+        verify(syncAutoRestoreManager, never()).setRestoreOnReinstallEnabled(any())
+        verify(syncAutoRestoreManager, never()).saveRecoveryPayload(any(), anyOrNull())
+        verify(syncAutoRestoreManager, never()).clearRecoveryCode()
+    }
+
+    @Test
+    fun whenScreenExitsWithNoNetChangeToToggleThenNoStorageOperations() = runTest {
+        whenever(syncAutoRestoreManager.isAutoRestoreAvailable()).thenReturn(true)
+        whenever(syncAutoRestoreManager.isRestoreOnReinstallEnabled()).thenReturn(false)
+        givenAuthenticatedUser()
+
+        testee.viewState().test {
+            expectMostRecentItem()
+            testee.onAutoRestoreToggleChanged(true)
+            awaitItem()
+            testee.onAutoRestoreToggleChanged(false)
+            awaitItem()
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        testee.onScreenExit()
+
+        verify(syncAutoRestoreManager, never()).setRestoreOnReinstallEnabled(any())
+        verify(syncAutoRestoreManager, never()).saveRecoveryPayload(any(), anyOrNull())
+        verify(syncAutoRestoreManager, never()).clearRecoveryCode()
     }
 
     private fun Command.assertCommandType(expectedType: KClass<out Command>) {

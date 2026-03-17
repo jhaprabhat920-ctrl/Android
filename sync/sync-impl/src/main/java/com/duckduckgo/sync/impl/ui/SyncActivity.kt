@@ -154,6 +154,11 @@ class SyncActivity : DuckDuckGoActivity() {
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        viewModel.onScreenExit()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -468,6 +473,15 @@ class SyncActivity : DuckDuckGoActivity() {
 
         binding.viewSyncDisabled.getDesktopBrowser.isVisible = viewState.newDesktopBrowserSettingEnabled
         binding.viewSyncDisabled.syncSetupOtherPlatforms.isVisible = !viewState.newDesktopBrowserSettingEnabled
+
+        binding.viewSyncEnabled.restoreOnReinstallItem.isVisible = viewState.showAutoRestoreToggle
+        if (viewState.showAutoRestoreToggle) {
+            binding.viewSyncEnabled.restoreOnReinstallItem.quietlySetIsChecked(viewState.autoRestoreEnabled) { _, isChecked ->
+                viewModel.onAutoRestoreToggleChanged(isChecked)
+            }
+            val iconRes = if (viewState.autoRestoreEnabled) R.drawable.device_default_24 else R.drawable.device_soft_alert_24
+            binding.viewSyncEnabled.restoreOnReinstallItem.setLeadingIconResource(iconRes)
+        }
 
         if (viewState.showAccount) {
             syncedDevicesAdapter.updateData(viewState.syncedDevices)
