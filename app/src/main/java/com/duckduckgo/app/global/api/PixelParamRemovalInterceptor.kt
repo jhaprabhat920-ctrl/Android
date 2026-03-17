@@ -202,6 +202,13 @@ object PixelInterceptorPixelsRequiringDataCleaning : PixelParamRemovalPlugin {
             AppPixelName.GET_DESKTOP_BROWSER_SHARE_DOWNLOAD_LINK_CLICK.pixelName to PixelParameter.removeAtb(),
             AppPixelName.GET_DESKTOP_BROWSER_LINK_CLICK.pixelName to PixelParameter.removeAtb(),
             AppPixelName.MENU_ACTION_VPN_PRESSED.pixelName to PixelParameter.removeAtb(),
+            AppPixelName.FORGET_ALL_PRESSED_BROWSING_DAILY.pixelName to PixelParameter.removeAtb(),
+            AppPixelName.FORGET_ALL_PRESSED_TABSWITCHING_DAILY.pixelName to PixelParameter.removeAtb(),
+            AppPixelName.FORGET_ALL_PRESSED_SETTINGS.pixelName to PixelParameter.removeAtb(),
+            AppPixelName.FORGET_ALL_PRESSED_SETTINGS_DAILY.pixelName to PixelParameter.removeAtb(),
+            AppPixelName.FIRE_DIALOG_CLEAR_PRESSED_DAILY.pixelName to PixelParameter.removeAtb(),
+            AppPixelName.FIRE_DIALOG_CLEAR_SINGLE_TAB_PRESSED.pixelName to PixelParameter.removeAtb(),
+            AppPixelName.FIRE_DIALOG_CLEAR_SINGLE_TAB_PRESSED_DAILY.pixelName to PixelParameter.removeAtb(),
         )
     }
 }
