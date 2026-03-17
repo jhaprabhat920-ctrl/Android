@@ -23,6 +23,7 @@ env:
   ASANA_PAT: ${{ secrets.ASANA_ACCESS_TOKEN }}
   GOOGLE_APPLICATION_CREDENTIALS: '#{ENV["HOME"]}/jenkins_static/com.duckduckgo.mobile.android/ddg-upload-firebase.json'
   GH_TOKEN: ${{ secrets.GT_DAXMOBILE }}
+  DAXMOBILE_ANDROID_AUTOMATION: ${{ secrets.DAXMOBILE_ANDROID_AUTOMATION }}
 
 jobs:
   build-apk:
