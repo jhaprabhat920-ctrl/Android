@@ -458,11 +458,10 @@ open class BrowserActivity : DuckDuckGoActivity() {
     }
 
     private fun showSnackbar(messageResId: Int) {
-        showSnackbar(getString(messageResId))
-        externalIntentProcessingState.onPendingSnackbarDisplayed()
+        showSnackbar(getString(messageResId), clearPendingState = true)
     }
 
-    private fun showSnackbar(message: String) {
+    private fun showSnackbar(message: String, clearPendingState: Boolean = false) {
         lifecycleScope.launch {
             delay(500)
 
@@ -481,6 +480,10 @@ open class BrowserActivity : DuckDuckGoActivity() {
                 message = message,
                 anchor = anchorView,
             ).show()
+
+            if (clearPendingState) {
+                externalIntentProcessingState.onPendingSnackbarDisplayed()
+            }
         }
     }
 
