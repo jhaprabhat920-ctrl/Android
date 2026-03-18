@@ -77,7 +77,7 @@ class DataClearing @Inject constructor(
         clearContextualChatDataIfNeeded(tabId)
 
         navigationHistory.removeHistoryForTab(tabId)
-        tabRepository.deleteTabs(listOf(tabId))
+        tabRepository.deleteTabAndSelectSource(tabId)
 
         logcat { "Single tab clear completed for tab: $tabId" }
         return clearDataResult
@@ -90,9 +90,9 @@ class DataClearing @Inject constructor(
         if (isDuckAiChatHistoryClearingEnabled) {
             val contextualTabChatUrl = contextualDataStore.getTabChatUrl(tabId)
             clearDuckAiChatIfNeeded(contextualTabChatUrl)
-
-            contextualDataStore.clearTabChatUrl(tabId)
         }
+
+        contextualDataStore.clearTabChatUrl(tabId)
     }
 
     private suspend fun clearDuckAiChatIfNeeded(tabUrl: String?) {

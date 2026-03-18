@@ -691,7 +691,7 @@ class DataClearingTest {
 
         testee.clearSingleTabData("tab1")
 
-        verify(mockTabRepository).deleteTabs(listOf("tab1"))
+        verify(mockTabRepository).deleteTabAndSelectSource("tab1")
     }
 
     @Test
@@ -700,7 +700,7 @@ class DataClearingTest {
 
         testee.clearSingleTabData("tab1")
 
-        verify(mockTabRepository).deleteTabs(listOf("tab1"))
+        verify(mockTabRepository).deleteTabAndSelectSource("tab1")
     }
 
     @Test
@@ -740,7 +740,7 @@ class DataClearingTest {
 
         testee.clearSingleTabData("tab1")
 
-        verify(mockTabRepository).deleteTabs(listOf("tab1"))
+        verify(mockTabRepository).deleteTabAndSelectSource("tab1")
     }
 
     @Test
@@ -750,7 +750,7 @@ class DataClearingTest {
 
         testee.clearSingleTabData("tab1")
 
-        verify(mockTabRepository).deleteTabs(listOf("tab1"))
+        verify(mockTabRepository).deleteTabAndSelectSource("tab1")
     }
 
     @Test
@@ -821,7 +821,7 @@ class DataClearingTest {
     }
 
     @Test
-    fun whenClearSingleTabDataWithContextualChatAndDuckAiChatsDisabled_thenDoNotDeleteContextualChat() = runTest {
+    fun whenClearSingleTabDataWithContextualChatAndDuckAiChatsDisabled_thenDoNotDeleteContextualChatButClearMapping() = runTest {
         whenever(mockTabVisitedSitesRepository.getVisitedSites("tab1")).thenReturn(emptySet())
         whenever(mockTabRepository.getTab("tab1")).thenReturn(null)
         configureManualOptions(emptySet())
@@ -829,7 +829,7 @@ class DataClearingTest {
         testee.clearSingleTabData("tab1")
 
         verify(mockContextualDataStore, never()).getTabChatUrl(any())
-        verify(mockContextualDataStore, never()).clearTabChatUrl(any())
+        verify(mockContextualDataStore).clearTabChatUrl("tab1")
     }
 
     @Test
