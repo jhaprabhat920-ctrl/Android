@@ -161,7 +161,7 @@
     },
     {
       "stepType": "optOut",
-      "scanType": "formOptOut",
+      "optOutType": "formOptOut",
       "actions": [
         {
           "actionType": "navigate",
