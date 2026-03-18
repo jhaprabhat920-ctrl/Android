@@ -154,6 +154,17 @@ class RealBrowserMenuViewStateFactoryTest {
     }
 
     @Test
+    fun `when creating menu in new tab mode then download dot reflects download state`() = runTest {
+        whenever(downloadMenuStateProvider.hasNewDownload()).thenReturn(true)
+        val browserViewState = BrowserViewState()
+
+        val result = testee.create(omnibarViewMode = ViewMode.NewTab, viewState = browserViewState, customTabsMode = false)
+        val viewState = result as BrowserMenuViewState.NewTabPage
+
+        assertTrue(viewState.showDownloadDot)
+    }
+
+    @Test
     fun `when creating menu in malicious site mode we return the proper state`() = runTest {
         val browserViewState = BrowserViewState(
             showDuckChatOption = true,

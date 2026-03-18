@@ -187,6 +187,24 @@ class BrowserMenuBottomSheetTest {
     }
 
     @Test
+    fun whenRenderNewTabPageMenuWithShowDownloadDotTrueThenDownloadDotIndicatorIsVisible() {
+        val viewState = BrowserMenuViewState.NewTabPage(showDownloadDot = true)
+
+        dialog.render(viewState)
+
+        assertTrue(dialog.downloadsMenuItem.showDotIndicator)
+    }
+
+    @Test
+    fun whenRenderNewTabPageMenuWithShowDownloadDotFalseThenDownloadDotIndicatorIsHidden() {
+        val viewState = BrowserMenuViewState.NewTabPage(showDownloadDot = false)
+
+        dialog.render(viewState)
+
+        assertFalse(dialog.downloadsMenuItem.showDotIndicator)
+    }
+
+    @Test
     fun whenRenderBrowserMenuWithShowDownloadDotTrueThenDownloadDotIndicatorIsVisible() {
         val viewState = BrowserMenuViewState.Browser(showDownloadDot = true)
 

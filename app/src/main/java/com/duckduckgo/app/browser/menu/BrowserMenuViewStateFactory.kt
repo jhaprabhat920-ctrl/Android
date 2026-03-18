@@ -88,6 +88,7 @@ class RealBrowserMenuViewStateFactory @Inject constructor(
             isEmailSignedIn = browserViewState.isEmailSignedIn,
             showAutofill = browserViewState.showAutofill,
             canGoForward = browserViewState.canGoForward,
+            showDownloadDot = downloadMenuStateProvider.hasNewDownload(),
         )
     }
 
