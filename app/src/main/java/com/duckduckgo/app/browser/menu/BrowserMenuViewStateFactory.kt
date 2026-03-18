@@ -87,6 +87,7 @@ class RealBrowserMenuViewStateFactory @Inject constructor(
             vpnMenuState = browserViewState.vpnMenuState,
             isEmailSignedIn = browserViewState.isEmailSignedIn,
             showAutofill = browserViewState.showAutofill,
+            showDownloadDot = downloadMenuStateProvider.hasNewDownload(),
             canGoForward = browserViewState.canGoForward,
         )
     }
@@ -99,6 +100,7 @@ class RealBrowserMenuViewStateFactory @Inject constructor(
             canPrintPage = browserViewState.canPrintPage,
             canReportSite = browserViewState.canReportSite,
             showAutofill = browserViewState.showAutofill,
+            showDownloadDot = downloadMenuStateProvider.hasNewDownload(),
             pageContextHeader = pageContextHeader,
         )
     }

@@ -66,12 +66,14 @@ sealed class BrowserMenuViewState {
         val isEmailSignedIn: Boolean = false,
         val vpnMenuState: VpnMenuState = VpnMenuState.Hidden,
         val showAutofill: Boolean = false,
+        val showDownloadDot: Boolean = false,
     ) : BrowserMenuViewState()
 
     data class DuckAi(
         val canPrintPage: Boolean = false,
         val canReportSite: Boolean = false,
         val showAutofill: Boolean = false,
+        val showDownloadDot: Boolean = false,
         val pageContextHeader: PageContextHeaderState,
     ) : BrowserMenuViewState()
 }
