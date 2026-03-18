@@ -85,6 +85,19 @@ jobs:
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
+      - name: Verify DuckSans token
+        env:
+          DAXMOBILE_ANDROID_AUTOMATION: ${{ secrets.DAXMOBILE_ANDROID_AUTOMATION }}
+        run: |
+          STATUS=$(curl -s -L -o /dev/null -w "%{http_code}" \
+            -H "Authorization: token $DAXMOBILE_ANDROID_AUTOMATION" \
+            "https://maven.pkg.github.com/duckduckgo/native-apps-ducksans/com/duckduckgo/ddg-proprietary-fonts/1.0.2/ddg-proprietary-fonts-1.0.2.pom")
+          echo "HTTP status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::DuckSans token check failed (HTTP $STATUS). Token may be expired or missing read:packages scope."
+            exit 1
+          fi
+
       - name: Assemble APK
         env:
           MALICIOUS_SITE_PROTECTION_AUTH_TOKEN: ${{ secrets.MALICIOUS_SITE_PROTECTION_AUTH_TOKEN }}
