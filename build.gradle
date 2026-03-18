@@ -44,12 +44,17 @@ def hasGprCredentials = gprUser != null && gprKey != null
 def useProprietaryFontProp = findProperty("useProprietaryFont")
 ext.proprietaryFontAvailable = hasGprCredentials && useProprietaryFontProp?.toBoolean() != false
 
+
+logger.lifecycle("[DuckSans] gprUser present: ${gprUser != null}, gprKey present: ${gprKey != null}, hasGprCredentials: ${hasGprCredentials}")
+logger.lifecycle("[DuckSans] useProprietaryFontProp: ${useProprietaryFontProp}, proprietaryFontAvailable: ${ext.proprietaryFontAvailable}")
+
 allprojects {
     repositories {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
         if (rootProject.ext.proprietaryFontAvailable) {
+            logger.lifecycle("[DuckSans] Adding DuckSans maven repository for project: ${project.name}")
             maven {
                 url = uri("https://maven.pkg.github.com/duckduckgo/native-apps-ducksans")
                 credentials {
@@ -57,6 +62,8 @@ allprojects {
                     password = gprKey
                 }
             }
+        } else {
+            logger.lifecycle("[DuckSans] Skipping DuckSans maven repository for project: ${project.name} (proprietaryFontAvailable=false)")
         }
     }
     configurations.all {
